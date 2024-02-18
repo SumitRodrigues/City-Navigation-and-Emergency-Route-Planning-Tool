@@ -25,12 +25,16 @@
                 <option value="Irvine">Irvine</option>
                 <option value="Santa Ana">Santa Ana</option>
                 <option value="Anaheim">Anaheim</option>
+                <option value="Los Angeles">Los Angeles</option>
+                <option value="Long Beach">Long Beach</option>
                 <!-- Add more cities as needed -->
             </select>
             <select id="destination">
                 <option value="Irvine">Irvine</option>
                 <option value="Santa Ana">Santa Ana</option>
                 <option value="Anaheim">Anaheim</option>
+                <option value="Los Angeles">Los Angeles</option>
+                <option value="Long Beach">Long Beach</option>
                 <!-- Add more cities as needed -->
             </select>
             <button onclick="findShortestPath()">Find Shortest Path</button>
@@ -48,16 +52,19 @@
         }).addTo(map);
 
         const cityGraph = [
-            [[1, 10], [2, 15]], // Connections from city 0 (Irvine)
-            [[0, 10], [3, 20]], // Connections from city 1 (Santa Ana)
-            [[0, 15], [3, 30]], // Connections from city 2 (Anaheim)
-            [[1, 20], [2, 30]]  // Connections from city 3
+            [[1, 10], [2, 15], [3, 50]], // Connections from city 0 (Irvine)
+            [[0, 10], [2, 20], [4, 25]], // Connections from city 1 (Santa Ana)
+            [[0, 15], [1, 20], [3, 30]], // Connections from city 2 (Anaheim)
+            [[0, 50], [2, 30], [4, 40]], // Connections from city 3 (Los Angeles)
+            [[1, 25], [3, 40]]           // Connections from city 4 (Long Beach)
         ];
-
+ 
         const cityCoordinates = [
             [33.6846, -117.8265], // Irvine
             [33.7455, -117.8677], // Santa Ana
-            [33.8366, -117.9143]  // Anaheim
+            [33.8366, -117.9143], // Anaheim
+            [34.0522, -118.2437], // Los Angeles
+            [33.7701, -118.1937]  // Long Beach
         ];
 
         function floydWarshall(graph) {
@@ -86,51 +93,25 @@
 
         let shortestPathPolyline;
 
-        let routingControl;
-
         function findShortestPath() {
-            if (routingControl) {
-                routingControl.removeFrom(map);
+            if (shortestPathPolyline) {
+                shortestPathPolyline.remove();
             }
 
             const sourceIndex = document.getElementById('source').selectedIndex;
             const destinationIndex = document.getElementById('destination').selectedIndex;
-            const sourceCoordinates = cityCoordinates[sourceIndex];
-            const destinationCoordinates = cityCoordinates[destinationIndex];
+            const shortestPaths = floydWarshall(cityGraph);
+            const shortestDistance = shortestPaths[sourceIndex][destinationIndex];
 
-            routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(sourceCoordinates),
-                    L.latLng(destinationCoordinates)
-                ],
-                routeWhileDragging: false,
-                show: false, // Don't show the default route line
-                lineOptions: {
-                    styles: [{ color: 'transparent' }] // Make the default line transparent
-                }
-            }).addTo(map);
+            shortestPathPolyline = L.polyline([
+                cityCoordinates[sourceIndex],
+                cityCoordinates[destinationIndex]
+            ], { color: 'red' }).addTo(map);
 
-            routingControl.on('routesfound', function (e) {
-                var routes = e.routes;
-                var summary = routes[0].summary;
+            map.fitBounds(shortestPathPolyline.getBounds());
 
-                // Remove the previous polyline if it exists
-                if (shortestPathPolyline) {
-                    shortestPathPolyline.remove();
-                }
-
-                // Draw the route using a polyline
-                shortestPathPolyline = L.polyline(routes[0].coordinates, {
-                    color: 'red',
-                    weight: 5,
-                    opacity: 0.7
-                }).addTo(map);
-
-                alert(`Shortest path distance: ${summary.totalDistance} meters, duration: ${summary.totalTime} seconds`);
-            });
+            alert(`Shortest path from ${document.getElementById('source').value} to ${document.getElementById('destination').value} is ${shortestDistance} units.`);
         }
-
-
     </script>
 </body>
 

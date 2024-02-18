@@ -21,14 +21,31 @@ h1 {
 }
 
 .input-container {
-    text-align: center;
+    display: flex;
+    justify-content: center;
     margin-bottom: 20px;
 }
 
-.input-container select,
+.input-container select {
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
 .input-container button {
-    margin: 0 10px;
-    padding: 5px 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.input-container button:hover {
+    background-color: #45a049;
 }
 
 #map {
