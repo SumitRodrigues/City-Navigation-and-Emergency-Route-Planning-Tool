@@ -20,10 +20,22 @@ h1 {
     align-items: center;
 }
 
-#map{
+.input-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-container select,
+.input-container button {
+    margin: 0 10px;
+    padding: 5px 10px;
+}
+
+#map {
     height: 400px;
     width: 600px;
 }
+
 .navbar {
     display: flex;
     justify-content: center;

@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
@@ -39,15 +41,24 @@
         &copy; 2024 City Navigation Tool
     </footer>
     <script>
-        var map = L.map('map').setView([51.505, -0.09], 13);
+        var map = L.map('map').setView([33.6846, -117.8265], 10);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        L.marker([51.5, -0.09]).addTo(map)
-            .bindPopup('A pretty CSS popup.<br> Easily customizable.')
-            .openPopup();
+        const cityGraph = [
+            [[1, 10], [2, 15]], // Connections from city 0 (Irvine)
+            [[0, 10], [3, 20]], // Connections from city 1 (Santa Ana)
+            [[0, 15], [3, 30]], // Connections from city 2 (Anaheim)
+            [[1, 20], [2, 30]]  // Connections from city 3
+        ];
+
+        const cityCoordinates = [
+            [33.6846, -117.8265], // Irvine
+            [33.7455, -117.8677], // Santa Ana
+            [33.8366, -117.9143]  // Anaheim
+        ];
 
         function floydWarshall(graph) {
             const numVertices = graph.length;
@@ -73,20 +84,52 @@
             return dist;
         }
 
-        const cityGraph = [
-            [[1, 10], [2, 15]], // Connections from city 0 (Irvine)
-            [[0, 10], [3, 20]], // Connections from city 1 (Santa Ana)
-            [[0, 15], [3, 30]], // Connections from city 2 (Anaheim)
-            [[1, 20], [2, 30]]  // Connections from city 3
-        ];
+        let shortestPathPolyline;
+
+        let routingControl;
 
         function findShortestPath() {
+            if (routingControl) {
+                routingControl.removeFrom(map);
+            }
+
             const sourceIndex = document.getElementById('source').selectedIndex;
             const destinationIndex = document.getElementById('destination').selectedIndex;
-            const shortestPaths = floydWarshall(cityGraph);
-            const shortestDistance = shortestPaths[sourceIndex][destinationIndex];
-            alert(`Shortest path from ${document.getElementById('source').value} to ${document.getElementById('destination').value} is ${shortestDistance} units.`);
+            const sourceCoordinates = cityCoordinates[sourceIndex];
+            const destinationCoordinates = cityCoordinates[destinationIndex];
+
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(sourceCoordinates),
+                    L.latLng(destinationCoordinates)
+                ],
+                routeWhileDragging: false,
+                show: false, // Don't show the default route line
+                lineOptions: {
+                    styles: [{ color: 'transparent' }] // Make the default line transparent
+                }
+            }).addTo(map);
+
+            routingControl.on('routesfound', function (e) {
+                var routes = e.routes;
+                var summary = routes[0].summary;
+
+                // Remove the previous polyline if it exists
+                if (shortestPathPolyline) {
+                    shortestPathPolyline.remove();
+                }
+
+                // Draw the route using a polyline
+                shortestPathPolyline = L.polyline(routes[0].coordinates, {
+                    color: 'red',
+                    weight: 5,
+                    opacity: 0.7
+                }).addTo(map);
+
+                alert(`Shortest path distance: ${summary.totalDistance} meters, duration: ${summary.totalTime} seconds`);
+            });
         }
+
 
     </script>
 </body>
