@@ -1,8 +1,14 @@
+body {
+    background-image: url('homeBG.jpeg');
+    background-size: cover;
+    background-position: center;
+}
+
 h1 {
     text-align: center;
     justify-content: center;
     font-size: 2rem;
-    color: #333;
+    color: #ffff;
     margin-top: 20px;
 }
 

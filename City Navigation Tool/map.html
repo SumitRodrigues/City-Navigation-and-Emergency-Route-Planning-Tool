@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>City Navigation Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+
+<body class="d-flex flex-column bg-white">
+    <nav class="navbar">
+        <a href="home.html">Home</a>
+        <a href="map.html">Map</a>
+        <a href="blockages.html">Blockages</a>
+    </nav>
+    <h1>City Navigation Tool</h1>
+    <div class="container">
+        <div class="input-container">
+            <select id="source">
+                <option value="Irvine">Irvine</option>
+                <option value="Santa Ana">Santa Ana</option>
+                <option value="Anaheim">Anaheim</option>
+                <!-- Add more cities as needed -->
+            </select>
+            <select id="destination">
+                <option value="Irvine">Irvine</option>
+                <option value="Santa Ana">Santa Ana</option>
+                <option value="Anaheim">Anaheim</option>
+                <!-- Add more cities as needed -->
+            </select>
+            <button onclick="findShortestPath()">Find Shortest Path</button>
+        </div>
+        <div id="map"></div>
+    </div>
+    <footer>
+        &copy; 2024 City Navigation Tool
+    </footer>
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        L.marker([51.5, -0.09]).addTo(map)
+            .bindPopup('A pretty CSS popup.<br> Easily customizable.')
+            .openPopup();
+
+        function floydWarshall(graph) {
+            const numVertices = graph.length;
+            const dist = Array.from({ length: numVertices }, () => Array(numVertices).fill(Infinity));
+
+            for (let i = 0; i < numVertices; i++) {
+                dist[i][i] = 0;
+                graph[i].forEach(([v, weight]) => {
+                    dist[i][v] = weight;
+                });
+            }
+
+            for (let k = 0; k < numVertices; k++) {
+                for (let i = 0; i < numVertices; i++) {
+                    for (let j = 0; j < numVertices; j++) {
+                        if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                            dist[i][j] = dist[i][k] + dist[k][j];
+                        }
+                    }
+                }
+            }
+
+            return dist;
+        }
+
+        const cityGraph = [
+            [[1, 10], [2, 15]], // Connections from city 0 (Irvine)
+            [[0, 10], [3, 20]], // Connections from city 1 (Santa Ana)
+            [[0, 15], [3, 30]], // Connections from city 2 (Anaheim)
+            [[1, 20], [2, 30]]  // Connections from city 3
+        ];
+
+        function findShortestPath() {
+            const sourceIndex = document.getElementById('source').selectedIndex;
+            const destinationIndex = document.getElementById('destination').selectedIndex;
+            const shortestPaths = floydWarshall(cityGraph);
+            const shortestDistance = shortestPaths[sourceIndex][destinationIndex];
+            alert(`Shortest path from ${document.getElementById('source').value} to ${document.getElementById('destination').value} is ${shortestDistance} units.`);
+        }
+
+    </script>
+</body>
+
+</html>
