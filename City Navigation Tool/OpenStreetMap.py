@@ -5,6 +5,12 @@ import numpy as np
 # Download and model a street network for a city
 def download_osm_data(place_name):
     graph = ox.graph_from_place(place_name, network_type='drive')
+    # Manually add edge lengths
+    for u, v, key, data in graph.edges(keys=True, data=True):
+        if 'length' not in data:
+            p1 = graph.nodes[u]['y'], graph.nodes[u]['x']
+            p2 = graph.nodes[v]['y'], graph.nodes[v]['x']
+            data['length'] = ox.distance.great_circle_vec(p1, p2)
     return graph
 
 # Convert the graph to an adjacency matrix
