@@ -51,6 +51,22 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
+        L.Routing.control({
+            waypoints: [
+                L.latLng(33.6846, -117.8265),
+                L.latLng(33.7701, -118.1937)
+            ],
+            router: L.Routing.mapbox('pk.eyJ1Ijoic3VtaXRyb2QiLCJhIjoiY2xzczlja2lsMWpueTJrbjFncnhwODR3bSJ9.yd_BUF4Cd1dkVGVga01iLg'),
+            geocoder: L.Control.Geocoder.nominatim(),
+            createMarker: () => {
+                return null;
+            },
+            lineOptions: {
+                styles: [{ color: lineColor, opacity: 1, weight: 5 }],
+            },
+            routeWhileDragging: true
+        }).addTo(map);
+
         const cityGraph = [
             [[1, 10], [2, 15], [3, 50]], // Connections from city 0 (Irvine)
             [[0, 10], [2, 20], [4, 25]], // Connections from city 1 (Santa Ana)
@@ -58,7 +74,7 @@
             [[0, 50], [2, 30], [4, 40]], // Connections from city 3 (Los Angeles)
             [[1, 25], [3, 40]]           // Connections from city 4 (Long Beach)
         ];
- 
+
         const cityCoordinates = [
             [33.6846, -117.8265], // Irvine
             [33.7455, -117.8677], // Santa Ana
