@@ -22,19 +22,19 @@
     <div class="container">
         <div class="input-container">
             <select id="source">
-                <option value="Irvine">Irvine</option>
-                <option value="Santa Ana">Santa Ana</option>
-                <option value="Anaheim">Anaheim</option>
-                <option value="Los Angeles">Los Angeles</option>
-                <option value="Long Beach">Long Beach</option>
+                <option value="33.6846,-117.8265">Irvine</option>
+                <option value="33.7455,-117.8677">Santa Ana</option>
+                <option value="33.8366,-117.9143">Anaheim</option>
+                <option value="34.0522,-118.2437">Los Angeles</option>
+                <option value="33.7701,-118.1937">Long Beach</option>
                 <!-- Add more cities as needed -->
             </select>
             <select id="destination">
-                <option value="Irvine">Irvine</option>
-                <option value="Santa Ana">Santa Ana</option>
-                <option value="Anaheim">Anaheim</option>
-                <option value="Los Angeles">Los Angeles</option>
-                <option value="Long Beach">Long Beach</option>
+                <option value="33.6846,-117.8265">Irvine</option>
+                <option value="33.7455,-117.8677">Santa Ana</option>
+                <option value="33.8366,-117.9143">Anaheim</option>
+                <option value="34.0522,-118.2437">Los Angeles</option>
+                <option value="33.7701,-118.1937">Long Beach</option>
                 <!-- Add more cities as needed -->
             </select>
             <button onclick="findShortestPath()">Find Shortest Path</button>
@@ -46,88 +46,27 @@
     </footer>
     <script>
         var map = L.map('map').setView([33.6846, -117.8265], 10);
-
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        mapLink = "<a href='http://openstreetmap.org'>OpenStreetMap</a>";
+        var titleLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        L.Routing.control({
+        var taxiIcon = L.icon({
+            iconUrl: 'blue.png',
+            iconSize: [70, 70]
+        })
+
+        var marker = L.marker([33.6846, -117.8265], { icon: taxiIcon }).addTo(map);
+
+        var routingControl = L.Routing.control({
             waypoints: [
                 L.latLng(33.6846, -117.8265),
-                L.latLng(33.7701, -118.1937)
+                L.latLng(33.6846, -117.8265) // Placeholder for destination
             ],
-            router: L.Routing.mapbox('pk.eyJ1Ijoic3VtaXRyb2QiLCJhIjoiY2xzczlja2lsMWpueTJrbjFncnhwODR3bSJ9.yd_BUF4Cd1dkVGVga01iLg'),
-            geocoder: L.Control.Geocoder.nominatim(),
-            createMarker: () => {
-                return null;
-            },
             lineOptions: {
-                styles: [{ color: lineColor, opacity: 1, weight: 5 }],
-            },
-            routeWhileDragging: true
+                styles: [{ color: 'red', opacity: 1, weight: 5 }]
+            }
         }).addTo(map);
-
-        const cityGraph = [
-            [[1, 10], [2, 15], [3, 50]], // Connections from city 0 (Irvine)
-            [[0, 10], [2, 20], [4, 25]], // Connections from city 1 (Santa Ana)
-            [[0, 15], [1, 20], [3, 30]], // Connections from city 2 (Anaheim)
-            [[0, 50], [2, 30], [4, 40]], // Connections from city 3 (Los Angeles)
-            [[1, 25], [3, 40]]           // Connections from city 4 (Long Beach)
-        ];
-
-        const cityCoordinates = [
-            [33.6846, -117.8265], // Irvine
-            [33.7455, -117.8677], // Santa Ana
-            [33.8366, -117.9143], // Anaheim
-            [34.0522, -118.2437], // Los Angeles
-            [33.7701, -118.1937]  // Long Beach
-        ];
-
-        function floydWarshall(graph) {
-            const numVertices = graph.length;
-            const dist = Array.from({ length: numVertices }, () => Array(numVertices).fill(Infinity));
-
-            for (let i = 0; i < numVertices; i++) {
-                dist[i][i] = 0;
-                graph[i].forEach(([v, weight]) => {
-                    dist[i][v] = weight;
-                });
-            }
-
-            for (let k = 0; k < numVertices; k++) {
-                for (let i = 0; i < numVertices; i++) {
-                    for (let j = 0; j < numVertices; j++) {
-                        if (dist[i][k] + dist[k][j] < dist[i][j]) {
-                            dist[i][j] = dist[i][k] + dist[k][j];
-                        }
-                    }
-                }
-            }
-
-            return dist;
-        }
-
-        let shortestPathPolyline;
-
-        function findShortestPath() {
-            if (shortestPathPolyline) {
-                shortestPathPolyline.remove();
-            }
-
-            const sourceIndex = document.getElementById('source').selectedIndex;
-            const destinationIndex = document.getElementById('destination').selectedIndex;
-            const shortestPaths = floydWarshall(cityGraph);
-            const shortestDistance = shortestPaths[sourceIndex][destinationIndex];
-
-            shortestPathPolyline = L.polyline([
-                cityCoordinates[sourceIndex],
-                cityCoordinates[destinationIndex]
-            ], { color: 'red' }).addTo(map);
-
-            map.fitBounds(shortestPathPolyline.getBounds());
-
-            alert(`Shortest path from ${document.getElementById('source').value} to ${document.getElementById('destination').value} is ${shortestDistance} units.`);
-        }
     </script>
 </body>
 
